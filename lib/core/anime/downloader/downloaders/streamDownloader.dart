@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/commons/extensions.dart';
+import 'package:animestream/core/remuxer/remuxer.dart';
 import 'package:http/http.dart';
 
 class StreamDownloader extends BaseDownloader {
@@ -13,16 +14,23 @@ class StreamDownloader extends BaseDownloader {
   Future<void> download() async {
     await super.setUpPorts(task);
 
-    final finalPath =
-        await helper.makeDirectory(fileName: task.fileName, fileExtension: "mp4", downloadPath: task.downloadPath);
+    final finalPath = await helper.makeDirectory(
+        fileName: task.fileName, fileExtension: task.useMkvRemuxer ? "mkv" : "mp4", downloadPath: task.downloadPath);
 
     // Download subtitles if available
     if (task.subsUrl != null) await downloadSubs(task.subsUrl!, task.fileName, finalPath);
 
-    final output = File(finalPath);
+    File? output;
+    TsToMkvRemuxer? remuxed;
+
+    if (task.useMkvRemuxer) {
+      remuxed = TsToMkvRemuxer(finalPath);
+    } else {
+      output = File(finalPath);
+    }
 
     // open the write mode
-    final out = await output.openWrite(mode: task.resumeFrom == 0 ? FileMode.write : FileMode.append);
+    final out = await output?.openWrite(mode: task.resumeFrom == 0 ? FileMode.write : FileMode.append);
 
     try {
       final streamBaseLink = helper.makeBaseLink(task.url);
@@ -128,8 +136,13 @@ class StreamDownloader extends BaseDownloader {
         //sort the buffers
         buffers.sort((a, b) => a.index.compareTo(b.index));
 
+        // final dir = finalPath.split("/").sublist(0, finalPath.split("/").length - 1).join("/");
+
         // Write the downloaded buffers
-        for (final b in buffers) out.add(b.buffer);
+        for (final b in buffers) {
+          //  await File("${dir}/segment_${b.index}.ts").writeAsBytes(b.buffer);
+          task.useMkvRemuxer ? await remuxed?.processChunk(b.buffer) : out?.add(b.buffer);
+        }
 
         // Start from next batch ig
         lastDownloadedSegmentIndex = i + parallelDownloadsBatchSize;
@@ -137,22 +150,25 @@ class StreamDownloader extends BaseDownloader {
 
       // send the completion/cancelled notification
       if (status.isCancelled) {
-        await out.close();
-        await output.delete();
+        await out?.close();
+        await output?.delete();
+        await remuxed?.close();
+
         super.setCancelledStatus();
       } else if (status.isPaused) {
       } // do nothing!
       else {
+        await out?.close();
+        await remuxed?.close();
         super.setCompletedStatus(finalPath);
-        await out.close();
       }
 
       print("[DOWNLOADER]<${task.id}> Closing download with state: ${status.name}");
     } catch (err) {
       print(err);
-
-      await out.close();
-      if (await output.exists()) output.delete();
+      await remuxed?.close();
+      await out?.close();
+      if (await output?.exists() ?? false) await output?.delete();
 
       //send download failed notification
       setFailedStatus(err.toString());

@@ -2,6 +2,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:animestream/ui/pages/settingPages/appInfo.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/pages/settingPages/downloader.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/pages/settingPages/ui.dart';
@@ -38,9 +39,17 @@ class _SettingsPageState extends State<SettingsPage> {
         label: "Player",
         description: "Tailor your playback",
         navigateTo: PlayerSetting()),
+    SettingItem(
+        label: "Downloader",
+        description: "Configure your downloads",
+        icon: Icons.download_rounded,
+        navigateTo: DownloaderSettings()),
     SettingItem(icon: Icons.tune_rounded, label: "General", description: "Basic tweaks", navigateTo: GeneralSetting()),
     SettingItem(
-        icon: Icons.info_outline_rounded, label: "App Info", description: "The App stuff", navigateTo: AppInfoSetting())
+        icon: Icons.info_outline_rounded,
+        label: "App Info",
+        description: "The App stuff",
+        navigateTo: AppInfoSetting()),
   ];
 
   @override

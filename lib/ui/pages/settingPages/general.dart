@@ -89,67 +89,6 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       },
                       description: "*maybe unstable",
                     ),
-                    ToggleItem(
-                        label: "Use faster downloading",
-                        value: fasterDownloads,
-                        onTapFunction: () {
-                          setState(() {
-                            fasterDownloads = !fasterDownloads;
-                          });
-                          writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
-                        },
-                        description: "*download 2x items per batch"),
-                    ToggleItem(
-                        label: "Queued downloads",
-                        value: useQueuedDownloads,
-                        description: "Download items one by one",
-                        onTapFunction: () {
-                          setState(() {
-                            useQueuedDownloads = !useQueuedDownloads;
-                            writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
-                          });
-                        }),
-                    InkWell(
-                      onTap: () async {
-                        String? dir;
-                        if (Platform.isWindows) {
-                          dir = await FilePickerWindows().getDirectoryPath();
-                        } else if(Platform.isLinux) {
-                          dir = await FilePickerLinux().getDirectoryPath();
-                        } else {
-                          dir = await FilePickerIO().getDirectoryPath();
-                        }
-                        if (dir == null) return;
-                        print("Path set to: $dir");
-                        await Settings().writeSettings(SettingsModal(downloadPath: dir));
-                        setState(() {});
-                        floatingSnackBar("might need to provide 'allow access to all files' while downloading!");
-                      },
-                      child: Container(
-                        padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Download path",
-                                  style: textStyle(),
-                                ),
-                                Text(
-                                  currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream',
-                                  style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                            Icon(Icons.navigate_next_rounded)
-                          ],
-                        ),
-                      ),
-                    ),
                     ClickableItem(
                       onTap: () {
                         showModalBottomSheet(

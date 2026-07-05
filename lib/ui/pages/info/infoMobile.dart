@@ -1,5 +1,6 @@
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/data/watching.dart';
+import 'package:animestream/ui/models/bottomSheets/batchDownload.dart';
 import 'package:animestream/ui/models/bottomSheets/commentSection.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
@@ -394,23 +395,8 @@ class _InfoMobileState extends State<InfoMobile> {
                                     context: context,
                                     showDragHandle: true,
                                     builder: (context) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(left: 8, right: 8),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Batch Download",
-                                              style: TextStyle(
-                                                color: appTheme.textMainColor,
-                                                fontFamily: "Rubik",
-                                                fontSize: 23,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Row(),
-                                          ],
-                                        ),
+                                      return BatchDownloadSheetContent(
+                                        provider: provider,
                                       );
                                     });
                               },

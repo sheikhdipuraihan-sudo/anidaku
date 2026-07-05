@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:flutter/foundation.dart';
@@ -13,14 +15,34 @@ class AppWrapper extends StatelessWidget {
 
   static final navKey = GlobalKey<NavigatorState>();
 
-  static final _isDesktop = defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux;
+  static final _isDesktop =
+      defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux;
+
+  static const Set<String> _knownTilers = {'i3', 'sway', 'hyprland', 'bspwm', 'awesome', 'qtile', 'xmonad'};
+
+  bool isLinuxTilingWM() {
+    if (!Platform.isLinux) return false;
+
+    final env = Platform.environment;
+    if (env.containsKey('SWAYSOCK') || env.containsKey('HYPRLAND_INSTANCE_SIGNATURE')) return true;
+
+    final currentDesktop = (env['XDG_CURRENT_DESKTOP'] ?? '').toLowerCase();
+    final desktopSession = (env['DESKTOP_SESSION'] ?? '').toLowerCase();
+
+    for (final wm in _knownTilers) {
+      if (currentDesktop.contains(wm) || desktopSession.contains(wm)) return true;
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: (_isDesktop &&
               !Provider.of<AppProvider>(context).isFullScreen &&
-              !Provider.of<AppProvider>(context).showTitleBar)
+              !Provider.of<AppProvider>(context).showTitleBar &&
+              !isLinuxTilingWM())
           ? PreferredSize(
               preferredSize: const Size(double.maxFinite, 33),
               child: Container(

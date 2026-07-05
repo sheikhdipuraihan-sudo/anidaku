@@ -81,6 +81,9 @@ class SettingsModal {
   /// Use the old navbar instead of the new one (Not available for desktops) [defaults to false]
   final bool? useOldNavbar;
 
+  /// Use experimental mkv video convertion
+  final bool? useMkvRemuxer; 
+
   SettingsModal({
     this.megaSkipDuration,
     this.skipDuration,
@@ -107,6 +110,7 @@ class SettingsModal {
     this.enableHoldToSpeedUp,
     this.enablePlayerGestures,
     this.useOldNavbar,
+    this.useMkvRemuxer,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -136,6 +140,7 @@ class SettingsModal {
       enableHoldToSpeedUp: map['enableHoldToSpeedUp'] ?? true,
       enablePlayerGestures: map['enablePlayerGestures'] ?? false,
       useOldNavbar: map['useOldNavbar'] ?? false,
+      useMkvRemuxer: map['useMkvRemuxer'] ?? false,
     );
   }
 
@@ -166,6 +171,7 @@ class SettingsModal {
       'enableHoldToSpeedUp': enableHoldToSpeedUp,
       'enablePlayerGestures': enablePlayerGestures,
       'useOldNavbar': useOldNavbar,
+      'useMkvRemuxer': useMkvRemuxer,
     };
   }
 }

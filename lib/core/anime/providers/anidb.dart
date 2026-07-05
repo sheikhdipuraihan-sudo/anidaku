@@ -21,6 +21,8 @@ class AniDB implements AnimeProvider {
       headers: _headers,
     );
 
+    // print(res.body);
+
     final document = html.parse(res.body);
     final aTags = document.querySelectorAll(".anime-grid a");
 

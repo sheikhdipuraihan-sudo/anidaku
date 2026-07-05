@@ -31,13 +31,6 @@ class AniListLogin extends DatabaseLogin {
       await storeSecureVal(SecureStorageKey.anilistToken, _extractToken(res));
       return true;
     }
-    // final nav = Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => WebView(url: url),
-    //   ),
-    // );
-    // return nav;
   }
 
   Future<void> removeToken() async {

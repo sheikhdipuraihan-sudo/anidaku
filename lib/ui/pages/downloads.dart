@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -48,6 +49,10 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
     }
   }
 
+  final _linkTfController = TextEditingController();
+  final _headerTfController = TextEditingController();
+  final _titleTfController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,6 +83,59 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
             ),
           ),
           actions: [
+            IconButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text("Download"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                DownloadManager().addDownloadTask(_linkTfController.text, _titleTfController.text,
+                                    customHeaders: Map.castFrom(jsonDecode(_headerTfController.text)));
+                                Navigator.pop(context);
+                              },
+                              child: Text("Download"),
+                            ),
+                          ],
+                          content: Container(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(
+                                  controller: _titleTfController,
+                                  decoration: InputDecoration(
+                                    labelText: "File name",
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _linkTfController,
+                                  decoration: InputDecoration(
+                                    labelText: "Link",
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _headerTfController,
+                                  decoration: InputDecoration(
+                                    labelText: "Header",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      });
+                },
+                icon: Icon(Icons.wash_rounded)),
             // if (kDebugMode)
             IconButton(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(

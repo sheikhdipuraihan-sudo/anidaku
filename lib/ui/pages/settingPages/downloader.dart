@@ -1,0 +1,124 @@
+import 'dart:io';
+
+import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/data/settings.dart';
+import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/toggleItem.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+
+class DownloaderSettings extends StatefulWidget {
+  const DownloaderSettings({super.key});
+
+  @override
+  State<DownloaderSettings> createState() => _DownloaderSettingsState();
+}
+
+class _DownloaderSettingsState extends State<DownloaderSettings> {
+  Future<void> writeSettings(SettingsModal settings) async {
+    await Settings().writeSettings(settings);
+    setState(() {
+      readSettings();
+    });
+  }
+
+  Future<void> readSettings() async {
+    final settings = await Settings().getSettings();
+    setState(() {
+      fasterDownloads = settings.fasterDownloads!;
+      useQueuedDownloads = settings.useQueuedDownloads!;
+    });
+  }
+
+  bool fasterDownloads = false;
+  bool useQueuedDownloads = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: appTheme.backgroundColor,
+        body: SingleChildScrollView(
+          child: Container(
+            padding: pagePadding(context, bottom: true),
+            child: Column(
+              children: [
+                settingPagesTitleHeader(context, "Downloader Settings"),
+                ToggleItem(
+                    label: "Use faster downloading",
+                    value: fasterDownloads,
+                    onTapFunction: () {
+                      setState(() {
+                        fasterDownloads = !fasterDownloads;
+                      });
+                      writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
+                    },
+                    description: "download 2x items per batch"),
+                ToggleItem(
+                    label: "Queued downloads",
+                    value: useQueuedDownloads,
+                    description: "Download items one by one",
+                    onTapFunction: () {
+                      setState(() {
+                        useQueuedDownloads = !useQueuedDownloads;
+                        writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
+                      });
+                    }),
+
+                // f**k experimental notice
+                ToggleItem(
+                  label: "Use MKV Remuxer",
+                  value: currentUserSettings?.useMkvRemuxer ?? false,
+                  description: "Remux streams to MKV",
+                  onTapFunction: () => setState(() async {
+                    await writeSettings(SettingsModal(useMkvRemuxer: !(currentUserSettings?.useMkvRemuxer ?? false)));
+                  }),
+                ),
+                InkWell(
+                  onTap: () async {
+                    String? dir;
+                    if (Platform.isWindows) {
+                      dir = await FilePickerWindows().getDirectoryPath();
+                    } else if (Platform.isLinux) {
+                      dir = await FilePickerLinux().getDirectoryPath();
+                    } else {
+                      dir = await FilePickerIO().getDirectoryPath();
+                    }
+                    if (dir == null) return;
+                    print("Path set to: $dir");
+                    await Settings().writeSettings(SettingsModal(downloadPath: dir));
+                    setState(() {});
+                    floatingSnackBar("might need to provide 'allow access to all files' while downloading!");
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Download path",
+                              style: textStyle(),
+                            ),
+                            Text(
+                              currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream',
+                              style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                        Icon(Icons.navigate_next_rounded)
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
+  }
+}

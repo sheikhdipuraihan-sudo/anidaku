@@ -5,16 +5,15 @@ import 'package:flutter/foundation.dart';
 // some of them here are just for names lol
 enum DownloadStatus { downloading, queued, paused, completed, cancelled, failed }
 
-DownloadStatus getDownloadStatus(String status) => switch(status) {
-    "downloading" => DownloadStatus.downloading,
-    "queued" => DownloadStatus.queued,
-    "paused" => DownloadStatus.paused,
-    "completed" => DownloadStatus.completed,
-    "cancelled" => DownloadStatus.cancelled,
-    "failed" => DownloadStatus.failed,
-
-    _ => throw Exception("Unknown DownloadStats value")
-  };
+DownloadStatus getDownloadStatus(String status) => switch (status) {
+      "downloading" => DownloadStatus.downloading,
+      "queued" => DownloadStatus.queued,
+      "paused" => DownloadStatus.paused,
+      "completed" => DownloadStatus.completed,
+      "cancelled" => DownloadStatus.cancelled,
+      "failed" => DownloadStatus.failed,
+      _ => throw Exception("Unknown DownloadStats value")
+    };
 
 class DownloadItem {
   // The download ID
@@ -106,6 +105,7 @@ class DownloadTaskIsolate {
   final String? subsUrl;
   final SendPort? sendPort;
   final int resumeFrom;
+  final bool useMkvRemuxer;
   String downloadPath;
 
   DownloadTaskIsolate({
@@ -119,11 +119,12 @@ class DownloadTaskIsolate {
     required this.id,
     required this.downloadPath,
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
+    this.useMkvRemuxer = false,
   });
 
   @override
   String toString() {
-    return 'DownloadTaskIsolate(url: $url, fileName: $fileName, id: $id, customHeaders: $customHeaders, retryAttempts: $retryAttempts, parallelBatches: $parallelBatches, subsUrl: $subsUrl, sendPort: $sendPort, resumeFrom: $resumeFrom, downloadPath: $downloadPath)';
+    return 'DownloadTaskIsolate(url: $url, fileName: $fileName, id: $id, customHeaders: $customHeaders, retryAttempts: $retryAttempts, parallelBatches: $parallelBatches, subsUrl: $subsUrl, sendPort: $sendPort, resumeFrom: $resumeFrom, downloadPath: $downloadPath, remux: $useMkvRemuxer)';
   }
 }
 
@@ -223,7 +224,7 @@ class DownloadHistoryItem {
   @override
   String toString() {
     return 'DownloadHistoryItem(id: $id, status: $status, timestamp: $timestamp, filePath: $filePath, url: $url, headers: $headers,'
-    'fileName: $fileName), size: $size, lastDownloadedPart: $lastDownloadedPart';
+        'fileName: $fileName), size: $size, lastDownloadedPart: $lastDownloadedPart';
   }
 }
 

@@ -26,10 +26,6 @@ Built with ❤️ using Flutter
 
 You can download the latest apk file from the [releases](https://github.com/frostnova721/animestream/releases) tab. Then install the downloaded apk!
 
-## Known Issues
-
-- Some files not downloading properly (fixes incoming!)
-
 ## Building
 
 - Clone the repo

@@ -140,7 +140,7 @@ class SettingsModal {
       enableHoldToSpeedUp: map['enableHoldToSpeedUp'] ?? true,
       enablePlayerGestures: map['enablePlayerGestures'] ?? false,
       useOldNavbar: map['useOldNavbar'] ?? false,
-      useMkvRemuxer: map['useMkvRemuxer'] ?? false,
+      useMkvRemuxer: map['useMkvRemuxer'] ?? true,
     );
   }
 

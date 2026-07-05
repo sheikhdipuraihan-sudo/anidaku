@@ -72,7 +72,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                   value: currentUserSettings?.useMkvRemuxer ?? false,
                   description: "Remux streams to MKV",
                   onTapFunction: () => setState(() async {
-                    await writeSettings(SettingsModal(useMkvRemuxer: !(currentUserSettings?.useMkvRemuxer ?? false)));
+                    await writeSettings(SettingsModal(useMkvRemuxer: !(currentUserSettings?.useMkvRemuxer ?? true)));
                   }),
                 ),
                 InkWell(

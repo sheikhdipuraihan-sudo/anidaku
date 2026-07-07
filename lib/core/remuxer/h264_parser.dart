@@ -176,6 +176,8 @@ class H264Parser {
 
     int profileIdc = reader.readBits(8);
     reader.readBits(8); // constraint_set_flags
+    
+    // ignore: unused_local_variable
     int levelIdc = reader.readBits(8);
     reader.readUe(); // seq_parameter_set_id
 

@@ -26,8 +26,8 @@ class TsDemuxer {
     final results = <PesPacket>[];
 
     final buffers = <int, BytesBuilder>{};
-    final ptsMap = <int, int?>{};
-    final dtsMap = <int, int?>{};
+    // final ptsMap = <int, int?>{};
+    // final dtsMap = <int, int?>{};
 
     for (final p in packets) {
       final pid = _getPid(p);

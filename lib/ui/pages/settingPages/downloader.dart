@@ -44,7 +44,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
             padding: pagePadding(context, bottom: true),
             child: Column(
               children: [
-                settingPagesTitleHeader(context, "Downloader Settings"),
+                settingPagesTitleHeader(context, "Downloader"),
                 ToggleItem(
                     label: "Use faster downloading",
                     value: fasterDownloads,

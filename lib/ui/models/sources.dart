@@ -20,8 +20,13 @@ class SourceManager {
 
   static final SourceManager instance = SourceManager._();
 
+  static final _undownloadableSources = [
+    //uses mpd which needs ffmpeg to download (makes the app bulky :< )
+    "animeonsen", "anizone"
+  ];
+
   final List<ProviderDetails> inbuiltSources = [
-    // "Animepahe", well...
+    // "Animepahe", // well...
     "AnimeOnsen",
     // "Aniplay", rip aniplay
     "AniZone",
@@ -31,7 +36,10 @@ class SourceManager {
     "Gojo",
   ]
       .map((e) => ProviderDetails(
-          name: e, identifier: e.toLowerCase() + "_inbuilt", version: "0.0.0.0", supportDownloads: e != "AnimeOnsen"))
+          name: e,
+          identifier: e.toLowerCase() + "_inbuilt",
+          version: "0.0.0.0",
+          supportDownloads: _undownloadableSources.contains(e.toLowerCase())))
       .toList();
 
   /// Used till complete migration to remote providers is complete.
@@ -95,19 +103,6 @@ class SourceManager {
   }
 }
 
-// [
-//   // "gogoanime", RIP, you shall rest here till the end of this app's life!
-//   "Animepahe",
-//   "AnimeOnsen",
-//   "Aniplay",
-//   "Gojo",
-// ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0")).toList()
-
-// final List<String> unDownloadableSources = [
-//   //uses mpd which needs ffmpeg to download (makes the app bulky :< )
-//   "animeonsen",
-// ];
-
 final Map<String, AnimeProvider> sources = {
   "animepahe": AnimePahe(),
   "animeonsen": AnimeOnsen(),
@@ -125,20 +120,6 @@ AnimeProvider getClass(String source) {
   }
 
   return match;
-  // switch (source) {
-  //   // case "gogoanime":
-  //   // return GogoAnime();  :(
-  //   case "animepahe":
-  //     return AnimePahe();
-  //   case "animeonsen":
-  //     return AnimeOnsen();
-  //   // case "aniplay":
-  //   //   return AniPlay();
-  //   case "gojo":
-  //     return Gojo();
-  //   default:
-  //     throw new Exception("Invalid source");
-  // }
 }
 
 List<DropdownMenuEntry> getSourceDropdownList() {

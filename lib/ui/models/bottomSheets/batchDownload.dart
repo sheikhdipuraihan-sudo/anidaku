@@ -31,6 +31,5 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
         ],
       ),
     );
-    ;
   }
 }

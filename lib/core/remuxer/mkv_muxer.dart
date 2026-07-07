@@ -54,8 +54,8 @@ class MkvMuxer {
     // 3. Segment Info
     final infoData = <int>[
       ...Ebml.writeUint(0x2AD7B1, 1000000), // TimecodeScale = 1ms
-      ...Ebml.writeString(0x4D80, 'DartMuxer'),
-      ...Ebml.writeString(0x5741, 'DartMuxer'),
+      ...Ebml.writeString(0x4D80, 'Dart MKV Muxer'),
+      ...Ebml.writeString(0x5741, 'A CERTAIN GOATED APP'),
     ];
 
     _file!.writeFromSync(Ebml.writeId(0x1549A966));

@@ -2,16 +2,18 @@ import 'dart:io';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-Future<String> fetch(String uri) async {
-  final res = await get(Uri.parse(uri));
+Future<String> fetch(String uri,
+    {Duration? cacheDuration = Duration.zero}) async {
+  final res = await get(Uri.parse(uri), cacheDuration: cacheDuration);
   return res.body;
 }
 
-Future<String?> getMediaMimeType(String uri, Map<String, String>? headers) async {
+Future<String?> getMediaMimeType(
+    String uri, Map<String, String>? headers) async {
   final heads = await head(Uri.parse(uri), headers: headers);
   final type = heads.headers['content-type'];
   return type;

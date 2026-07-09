@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:html/parser.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class AniZone extends AnimeProvider {
   final baseUrl = "https://anizone.to";
@@ -11,7 +11,10 @@ class AniZone extends AnimeProvider {
   @override
   Future<List<Map<String, String?>>> search(String query) async {
     final url = "$baseUrl/anime?search=$query";
-    final res = await get(Uri.parse(url));
+    final res = await get(
+      Uri.parse(url),
+      cacheDuration: const Duration(minutes: 5),
+    );
 
     final doc = parse(res.body);
     final grid = doc.querySelector("div.grid.grid-cols-1.gap-4");
@@ -33,7 +36,7 @@ class AniZone extends AnimeProvider {
         throw Exception("Couldn't find anime data");
       }
 
-      final title = jsonDecode( match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
+      final title = jsonDecode(match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
 
       final a = child.querySelector("a");
       if (a == null) {
@@ -58,9 +61,13 @@ class AniZone extends AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
+      {bool dub = false}) async {
     final url = aliasId;
-    final res = await get(Uri.parse(url));
+    final res = await get(
+      Uri.parse(url),
+      cacheDuration: const Duration(minutes: 5),
+    );
     final doc = parse(res.body);
 
     final list = doc.querySelector("ul.grid.grid-cols-1")?.children;
@@ -72,7 +79,6 @@ class AniZone extends AnimeProvider {
     int i = 1;
 
     for (final item in list) {
-
       final divData = item.attributes['x-data'];
 
       final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
@@ -83,7 +89,7 @@ class AniZone extends AnimeProvider {
         throw Exception("Couldn't find anime data");
       }
 
-      final title = jsonDecode( match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
+      final title = jsonDecode(match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
 
       final epLink = item.querySelector("a")?.attributes['href'];
       final epImg = item.querySelector("img")?.attributes['src'];
@@ -104,16 +110,21 @@ class AniZone extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
+  Future<void> getDownloadSources(
+      String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update,
+  Future<void> getStreams(
+      String episodeId, Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) async {
     final url = episodeId;
-    final res = await get(Uri.parse(url));
+    final res = await get(
+      Uri.parse(url),
+      cacheDuration: const Duration(hours: 1),
+    );
     final doc = parse(res.body);
 
     final mediaPlayer = doc.querySelector("media-player");
@@ -132,14 +143,22 @@ class AniZone extends AnimeProvider {
     final List<Map<String, String>> subs = [];
 
     for (final track in tracks) {
-      if (track.attributes['srclang'] == "en" && track.attributes['kind'] == "subtitles" && track.attributes.containsKey("default")) {
-        subs.add({'url': track.attributes['src']!, 'type': track.attributes['data-type']!});
+      if (track.attributes['srclang'] == "en" &&
+          track.attributes['kind'] == "subtitles" &&
+          track.attributes.containsKey("default")) {
+        subs.add({
+          'url': track.attributes['src']!,
+          'type': track.attributes['data-type']!
+        });
       }
     }
 
-    final srcName =
-        doc.querySelector(".flex.gap-2.relative.items-center.p-3.rounded-lg.text-white.bg-teal-600")?.text.trim() ??
-            "single";
+    final srcName = doc
+            .querySelector(
+                ".flex.gap-2.relative.items-center.p-3.rounded-lg.text-white.bg-teal-600")
+            ?.text
+            .trim() ??
+        "single";
 
     update([
       VideoStream(

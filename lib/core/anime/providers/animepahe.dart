@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:animestream/core/anime/extractors/kwik.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
-import 'package:http/http.dart' as http;
+import 'package:animestream/core/network/network.dart' as http;
 import 'package:html/parser.dart' as html;
 
 class AnimePahe extends AnimeProvider {
@@ -20,7 +20,11 @@ class AnimePahe extends AnimeProvider {
   Future<List<Map<String, String?>>> search(String query) async {
     query = query.replaceAll("-", "");
     final String url = "https://animepahe.pw/api?m=search&q=$query";
-    final res = await http.get(Uri.parse(url), headers: _headers);
+    final res = await http.get(
+      Uri.parse(url),
+      headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
     final Map<String, dynamic> decoded = json.decode(res.body);
     final List<dynamic> results = decoded['data'];
     final List<Map<String, String?>> searchResults = [];
@@ -38,7 +42,11 @@ class AnimePahe extends AnimeProvider {
   Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String session, {bool dub = false}) async {
     List list = [];
     final String url = "https://animepahe.pw/api?m=release&id=$session&sort=episode_asc`";
-    final data = await http.get(Uri.parse(url), headers: _headers);
+    final data = await http.get(
+      Uri.parse(url),
+      headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
     final bodyDecoded = json.decode(data.body);
 
     list.add(bodyDecoded['data']);
@@ -46,7 +54,11 @@ class AnimePahe extends AnimeProvider {
 
     for (int i = 1; i < totalPages; i++) {
       if (i > 6) break; //sorry long episoded anime fans, its just not worth 40 requests. the time it gon take is huge!
-      final res = await http.get(Uri.parse("$url&page=${i + 1}"), headers: _headers);
+      final res = await http.get(
+        Uri.parse("$url&page=${i + 1}"),
+        headers: _headers,
+        cacheDuration: const Duration(minutes: 5),
+      );
       list.add(json.decode(res.body)['data']);
     }
 
@@ -78,7 +90,11 @@ class AnimePahe extends AnimeProvider {
       {bool dub = false, String? metadata}) async {
     // return await getDownloadSources(episodeUrl, update, dub: dub, metadata: metadata);
 
-    final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
+    final data = await http.get(
+      Uri.parse(episodeUrl),
+      headers: _headers,
+      cacheDuration: const Duration(hours: 1),
+    );
     final document = html.parse(data.body);
     final streams = document.querySelectorAll('div#resolutionMenu > button');
     final links = [];

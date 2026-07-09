@@ -10,7 +10,7 @@ import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/mal/types.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class MALLogin extends DatabaseLogin {
   final _clientId = "165c40bb79c803049c4badcaa90cfd74";
@@ -28,7 +28,8 @@ class MALLogin extends DatabaseLogin {
     final loginUrl =
         "https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=$_clientId&code_challenge=$challenge&redirect_uri=$redirect&state=$state";
 
-    final req = await FlutterWebAuth2.authenticate(url: loginUrl, callbackUrlScheme: redirect.split(":")[0]);
+    final req = await FlutterWebAuth2.authenticate(
+        url: loginUrl, callbackUrlScheme: redirect.split(":")[0]);
 
     final queries = Uri.parse(req).queryParameters;
 
@@ -52,8 +53,9 @@ class MALLogin extends DatabaseLogin {
       'redirect_uri': redirect,
     };
 
-    final res =
-        await post(Uri.parse(acurl), body: reqBody, headers: {'Content-Type': 'application/x-www-form-urlencoded'});
+    final res = await post(Uri.parse(acurl),
+        body: reqBody,
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'});
 
     // if(res != 302) return false;
 
@@ -74,8 +76,11 @@ class MALLogin extends DatabaseLogin {
   String generateState() {
     final length = 16;
     final random = Random.secure();
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    final state = List.generate(length, (index) => chars[random.nextInt(chars.length)]).join();
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    final state =
+        List.generate(length, (index) => chars[random.nextInt(chars.length)])
+            .join();
 
     return state;
   }
@@ -83,7 +88,8 @@ class MALLogin extends DatabaseLogin {
   String generateCodeChallenge(String verifier) {
     final bytes = utf8.encode(verifier);
     final shaDigest = sha256.convert(bytes);
-    final challege = base64UrlEncode(Uint8List.fromList(shaDigest.bytes)).replaceAll("=", "");
+    final challege = base64UrlEncode(Uint8List.fromList(shaDigest.bytes))
+        .replaceAll("=", "");
 
     return challege;
   }
@@ -100,18 +106,22 @@ class MALLogin extends DatabaseLogin {
   @override
   Future<void>? refreshToken() async {
     final authResp = await getSecureVal(SecureStorageKey.malAuthResponse);
-    if (authResp == null) throw Exception("FOUND AUTH RESPONSE AS NULL. TRY LOGGING IN TO MAL AGAIN");
+    if (authResp == null)
+      throw Exception(
+          "FOUND AUTH RESPONSE AS NULL. TRY LOGGING IN TO MAL AGAIN");
     final classed = MALAuthResponse.fromMap(jsonDecode(authResp));
     final body = {
       'client_id': _clientId,
       "refresh_token": classed.refreshToken,
       "grant_type": 'refresh_token',
     };
-    final res = await post(Uri.parse("https://myanimelist.net/v1/oauth2/token"), body: body, headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': "Bearer " + classed.accessToken
-    });
-    
+    final res = await post(Uri.parse("https://myanimelist.net/v1/oauth2/token"),
+        body: body,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': "Bearer " + classed.accessToken
+        });
+
     if (res.statusCode != 200) throw Exception("COULDNT REFRESH THE TOKEN");
 
     final classedRes = MALAuthResponse.fromMap(jsonDecode(res.body));
@@ -128,6 +138,10 @@ class MALLogin extends DatabaseLogin {
     final res = await MAL().fetch(url);
     final data = jsonDecode(res);
     //doesnt have banners
-    return UserModal(avatar: data['picture'], banner: null, id: data['id'], name: data['name']);
+    return UserModal(
+        avatar: data['picture'],
+        banner: null,
+        id: data['id'],
+        name: data['name']);
   }
 }

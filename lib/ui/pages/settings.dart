@@ -1,6 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:animestream/ui/pages/settingPages/appInfo.dart';
+import 'package:animestream/ui/pages/settingPages/cache.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/downloader.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
@@ -32,8 +33,15 @@ class SettingItem {
 class _SettingsPageState extends State<SettingsPage> {
   final List<SettingItem> settingItems = [
     SettingItem(
-        icon: Icons.account_circle, label: "Account", description: "Personal stuff", navigateTo: AccountSetting()),
-    SettingItem(icon: Icons.brush_rounded, label: "UI", description: "Colors n Visuals", navigateTo: ThemeSetting()),
+        icon: Icons.account_circle,
+        label: "Account",
+        description: "Personal stuff",
+        navigateTo: AccountSetting()),
+    SettingItem(
+        icon: Icons.brush_rounded,
+        label: "UI",
+        description: "Colors n Visuals",
+        navigateTo: ThemeSetting()),
     SettingItem(
         icon: Icons.play_circle_fill_rounded,
         label: "Player",
@@ -44,7 +52,16 @@ class _SettingsPageState extends State<SettingsPage> {
         description: "Configure your downloads",
         icon: Icons.download_rounded,
         navigateTo: DownloaderSettings()),
-    SettingItem(icon: Icons.tune_rounded, label: "General", description: "Basic tweaks", navigateTo: GeneralSetting()),
+    SettingItem(
+        icon: Icons.tune_rounded,
+        label: "General",
+        description: "Basic tweaks",
+        navigateTo: GeneralSetting()),
+    SettingItem(
+        icon: Icons.storage_rounded,
+        label: "Cache Manager",
+        description: "Network & API cache",
+        navigateTo: CacheSetting()),
     SettingItem(
         icon: Icons.info_outline_rounded,
         label: "App Info",
@@ -67,7 +84,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
                 child: Text(
                   "Settings",
-                  style: TextStyle(fontFamily: "Rubik", fontSize: 40, color: appTheme.textMainColor),
+                  style: TextStyle(
+                      fontFamily: "Rubik",
+                      fontSize: 40,
+                      color: appTheme.textMainColor),
                 ),
               ),
               ListView.builder(
@@ -75,11 +95,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) => Container(
-                  padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+                  padding:
+                      EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
                   child: Container(
                     // margin: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-                    decoration:
-                        BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(
+                        color: appTheme.backgroundSubColor,
+                        borderRadius: BorderRadius.circular(20)),
                     clipBehavior: Clip.hardEdge,
                     child: Material(
                       color: Colors.transparent,
@@ -92,8 +114,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                 return settingItems[index].navigateTo;
                               },
                               transitionDuration: Duration(milliseconds: 100),
-                              reverseTransitionDuration: Duration(milliseconds: 100),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                              reverseTransitionDuration:
+                                  Duration(milliseconds: 100),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
                                 // final tween = Tween(begin: Offset(1.0, 0.0), end: Offset.zero);
                                 // final curvedAnimation = CurvedAnimation(
                                 //   parent: animation,
@@ -131,7 +155,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                   Padding(
                                     padding: const EdgeInsets.only(left: 20),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           settingItems[index].label,

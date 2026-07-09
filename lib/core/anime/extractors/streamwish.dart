@@ -5,13 +5,14 @@ import 'package:js_unpack/js_unpack.dart';
 import '../../commons/utils.dart';
 
 class StreamWish extends AnimeExtractor {
-  Future<List<VideoStream>> extract(String streamUrl, {String? label, Map<String, String>? headersOverrides}) async {
+  Future<List<VideoStream>> extract(String streamUrl,
+      {String? label, Map<String, String>? headersOverrides}) async {
     if (streamUrl.isEmpty) {
       throw new Exception("ERROR: INVALID STREAM LINK");
     }
 
     final serverName = label ?? "streamwish";
-    final res = await fetch(streamUrl);
+    final res = await fetch(streamUrl, cacheDuration: const Duration(hours: 1));
     final doc = html.parse(res);
     String streamLink = '';
     String? subtitles;
@@ -36,11 +37,16 @@ class StreamWish extends AnimeExtractor {
             final String data = JsUnpack(html).unpack();
             // print(data);
             unpackedData = data;
-            final dataMatch = RegExp(r'sources:\s*\[([\s\S]*?)\]').allMatches(data).firstOrNull?[1] ?? '';
+            final dataMatch = RegExp(r'sources:\s*\[([\s\S]*?)\]')
+                    .allMatches(data)
+                    .firstOrNull?[1] ??
+                '';
             streamLink = dataMatch.replaceAll(RegExp(r'{|}|\"|file:'), '');
           }
         } finally {
-          final subtitleData = RegExp(r'tracks:\[([\s\S]*?)\]').allMatches(unpackedData).firstOrNull;
+          final subtitleData = RegExp(r'tracks:\[([\s\S]*?)\]')
+              .allMatches(unpackedData)
+              .firstOrNull;
           if (subtitleData != null) {
             subtitles = _extractEnglishSubtitleLink(subtitleData[1] ?? "");
           }
@@ -63,7 +69,8 @@ class StreamWish extends AnimeExtractor {
         }
       }
     });
-    if (streamLink.isEmpty) throw new Exception("Couldnt get any $serverName streams");
+    if (streamLink.isEmpty)
+      throw new Exception("Couldnt get any $serverName streams");
     return [
       VideoStream(
         server: serverName,
@@ -71,15 +78,25 @@ class StreamWish extends AnimeExtractor {
         quality: "multi-quality",
         backup: false,
         subtitle: subtitles,
-        subtitleFormat: subtitles != null ? subtitles!.endsWith(".vtt") ? "vtt" : "ass" : null,
-        customHeaders: headersOverrides ?? {"Referer": streamUrl, "Origin": "https://${Uri.parse(streamUrl).host}"},
+        subtitleFormat: subtitles != null
+            ? subtitles!.endsWith(".vtt")
+                ? "vtt"
+                : "ass"
+            : null,
+        customHeaders: headersOverrides ??
+            {
+              "Referer": streamUrl,
+              "Origin": "https://${Uri.parse(streamUrl).host}"
+            },
       )
     ];
   }
 
   String? _extractEnglishSubtitleLink(String input) {
-    final regex = RegExp(r'\{[^}]*file\s*:\s*"([^"]+)"[^}]*label\s*:\s*"English"[^}]*kind\s*:\s*"captions"',
-        caseSensitive: false, multiLine: true);
+    final regex = RegExp(
+        r'\{[^}]*file\s*:\s*"([^"]+)"[^}]*label\s*:\s*"English"[^}]*kind\s*:\s*"captions"',
+        caseSensitive: false,
+        multiLine: true);
     final match = regex.firstMatch(input);
     return match != null ? match.group(1) : null;
   }

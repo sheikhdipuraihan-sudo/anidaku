@@ -11,7 +11,7 @@ import 'package:animestream/core/database/simkl/types.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class SimklLogin extends DatabaseLogin {
   static const callbackScheme = "auth.animestream://";
@@ -28,8 +28,9 @@ class SimklLogin extends DatabaseLogin {
       'response_type': "code",
       'redirect_uri': callbackScheme,
     });
-    final res =
-        await FlutterWebAuth2.authenticate(url: authUrl.toString(), callbackUrlScheme: callbackScheme.split(":")[0]);
+    final res = await FlutterWebAuth2.authenticate(
+        url: authUrl.toString(),
+        callbackUrlScheme: callbackScheme.split(":")[0]);
     final code = Uri.parse(res).queryParameters['code'];
     if (code == null) {
       throw Exception("ERR_RECIEVED_AUTH_CODE_NULL");
@@ -61,9 +62,11 @@ class SimklLogin extends DatabaseLogin {
   }
 
   static Future<PCKECodeResult> getPkceCode() async {
-    final url = "https://api.simkl.com/oauth/pin?client_id=${AnimeStreamEnvironment.simklClientId}";
+    final url =
+        "https://api.simkl.com/oauth/pin?client_id=${AnimeStreamEnvironment.simklClientId}";
     final res = await get(Uri.parse(url));
-    if (res.statusCode != 200) throw new Exception("Couldnt Get Code for Login");
+    if (res.statusCode != 200)
+      throw new Exception("Couldnt Get Code for Login");
     final jsoned = jsonDecode(res.body);
     final expSeconds = Duration(seconds: int.parse(jsoned['expires_in']));
     final currentUtcTime = DateTime.now().toUtc();
@@ -79,7 +82,8 @@ class SimklLogin extends DatabaseLogin {
 
   //function to call for polling
   static Future<bool> verifyPkceCode(PCKECodeResult codeRes) async {
-    final url = "https://api.simkl.com/oauth/pin/${codeRes.userCode}?client_id=${AnimeStreamEnvironment.simklClientId}";
+    final url =
+        "https://api.simkl.com/oauth/pin/${codeRes.userCode}?client_id=${AnimeStreamEnvironment.simklClientId}";
     final Completer<bool> completer = Completer<bool>();
     int failCount = 0;
     Timer.periodic(Duration(seconds: codeRes.interval), (timer) async {
@@ -121,7 +125,8 @@ class SimklLogin extends DatabaseLogin {
     }
 
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      throw SimklException("Failed to fetch simkl user profile", res.statusCode);
+      throw SimklException(
+          "Failed to fetch simkl user profile", res.statusCode);
     }
 
     final jsoned = jsonDecode(res.body);

@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class AniSkip {
   final String _baseUrl = "https://api.aniskip.com/v2";
 
-  Future<AniSkipResult?> getSkipTimes(int malId, int episodeNumber, {double episodeLength = 0}) async {
-    final url = "$_baseUrl/skip-times/${malId}/${episodeNumber}?types=op&types=ed&episodeLength=$episodeLength";
+  Future<AniSkipResult?> getSkipTimes(int malId, int episodeNumber,
+      {double episodeLength = 0}) async {
+    final url =
+        "$_baseUrl/skip-times/${malId}/${episodeNumber}?types=op&types=ed&episodeLength=$episodeLength";
     print(url);
 
     final res = await get(Uri.parse(url));
@@ -40,12 +42,12 @@ class AniSkip {
         // These values are always a double, but dart automatically converts some values
         // to int, and throws an error if we try to cast a double to it.
         // And... we dont want double, so we assert it to int via toInt()
-        start: (item['interval']['startTime']!).toInt(), // lets ignore the +/- 1 sec offset
+        start: (item['interval']['startTime']!)
+            .toInt(), // lets ignore the +/- 1 sec offset
         end: (item['interval']['endTime']!).toInt(),
         id: id,
         epLength: length,
       );
-
 
       type == "op" ? op = skipInterval : ed = skipInterval;
     }
@@ -71,7 +73,11 @@ class SkipInterval {
   final String id;
   final double epLength;
 
-  SkipInterval({required this.start, required this.end, required this.epLength, required this.id});
+  SkipInterval(
+      {required this.start,
+      required this.end,
+      required this.epLength,
+      required this.id});
 
   @override
   String toString() {

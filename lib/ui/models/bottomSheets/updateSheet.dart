@@ -6,7 +6,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 import 'package:open_file/open_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -40,7 +40,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
   String downloadPath = "";
 
   void downloadAndInstallUpdate() async {
-    final filename = "animestream_${widget.version}.${Platform.isWindows ? "exe" : "apk"}";
+    final filename =
+        "animestream_${widget.version}.${Platform.isWindows ? "exe" : "apk"}";
     final tempPath = await getTemporaryDirectory();
     downloadPath = "${tempPath.path}/$filename";
 
@@ -130,7 +131,11 @@ class _UpdateSheetState extends State<UpdateSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 15, right: 15, top: 10),
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom,
+          left: 15,
+          right: 15,
+          top: 10),
       child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -147,7 +152,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
                     children: [
                       Text(
                         "Update Available",
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 26, fontWeight: FontWeight.bold),
                       ),
 
                       // Padding(
@@ -158,10 +164,12 @@ class _UpdateSheetState extends State<UpdateSheet> {
                         children: [
                           Text(
                             widget.version,
-                            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold),
                           ),
                           Container(
-                              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 6, horizontal: 8),
                               margin: EdgeInsets.only(left: 12),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(100),
@@ -182,7 +190,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
                   IconButton(
                     onPressed: () async {
                       await launchUrl(
-                        Uri.parse("https://github.com/frostnova721/animestream/releases/latest"),
+                        Uri.parse(
+                            "https://github.com/frostnova721/animestream/releases/latest"),
                         mode: LaunchMode.externalApplication,
                       );
                     },
@@ -197,7 +206,9 @@ class _UpdateSheetState extends State<UpdateSheet> {
             ),
             Container(
               height: 400,
-              decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(25)),
+              decoration: BoxDecoration(
+                  color: appTheme.backgroundSubColor,
+                  borderRadius: BorderRadius.circular(25)),
               padding: EdgeInsets.all(14),
               child: ListView(
                 shrinkWrap: true,
@@ -236,7 +247,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
                             onPressed: () {
                               // if the update is downloaded and state is install, it automatically opens
                               // the available update file
-                              if (downloadState != DownloadState.downloading) return downloadAndInstallUpdate();
+                              if (downloadState != DownloadState.downloading)
+                                return downloadAndInstallUpdate();
                             },
                           );
                         },
@@ -248,7 +260,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
                     child: IconButton.outlined(
                       onPressed: () async {
                         _cancelDownload();
-                        if (downloadPath.isNotEmpty && downloadState != DownloadState.completed)
+                        if (downloadPath.isNotEmpty &&
+                            downloadState != DownloadState.completed)
                           await File(downloadPath).delete();
                         setState(() {});
                         Navigator.pop(context);
@@ -257,7 +270,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
                       style: IconButton.styleFrom(
                         side: BorderSide(color: appTheme.accentColor),
                         fixedSize: Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15)),
                       ),
                       icon: Icon(Icons.close),
                     ),
@@ -292,7 +306,8 @@ class LiquidDownloadButton extends StatelessWidget {
     required this.state,
     required this.progress,
     required this.onPressed,
-  }) : assert(progress >= 0 && progress <= 1, "Progress value must be between 0.0 and 1.0!");
+  }) : assert(progress >= 0 && progress <= 1,
+            "Progress value must be between 0.0 and 1.0!");
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +318,9 @@ class LiquidDownloadButton extends StatelessWidget {
         child: Container(
           height: 50,
           width: double.infinity,
-          color: state == DownloadState.idle ? appTheme.accentColor : appTheme.backgroundSubColor,
+          color: state == DownloadState.idle
+              ? appTheme.accentColor
+              : appTheme.backgroundSubColor,
           child: Stack(
             children: [
               if (state != DownloadState.idle)

@@ -4,7 +4,7 @@ import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/mal/types.dart';
 import 'package:animestream/core/database/types.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class MALMutation extends DatabaseMutation {
   @override
@@ -14,7 +14,10 @@ class MALMutation extends DatabaseMutation {
       int? progress = 0,
       MediaStatus? previousStatus}) async {
     final url = "https://api.myanimelist.net/v2/anime/$id/my_list_status";
-    final body = {'status': stringifyMediaStatus(status!), 'num_watched_episodes': '$progress'};
+    final body = {
+      'status': stringifyMediaStatus(status!),
+      'num_watched_episodes': '$progress'
+    };
     final header = {
       ...(await MAL.getHeader()),
       'Content-Type': 'application/x-www-form-urlencoded',

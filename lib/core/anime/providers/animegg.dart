@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:html/parser.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class Animegg implements AnimeProvider {
   @override
@@ -14,17 +14,24 @@ class Animegg implements AnimeProvider {
   @override
   Future<List<Map<String, String?>>> search(String query) async {
     final url = "$baseUrl/search/auto/?q=$query";
-    final res = await get(Uri.parse(url));
+    final res = await get(
+      Uri.parse(url),
+      cacheDuration: const Duration(minutes: 5),
+    );
 
-    final List<Map<String, dynamic>> items = List.castFrom(jsonDecode(res.body));
+    final List<Map<String, dynamic>> items =
+        List.castFrom(jsonDecode(res.body));
 
     final searchResults = <Map<String, String?>>[];
 
     for (final it in items) {
-      final img = (it['thumbnailUrl']?.startsWith("//") ?? false) ? "https:${it['thumbnailUrl']}" : null;
+      final img = (it['thumbnailUrl']?.startsWith("//") ?? false)
+          ? "https:${it['thumbnailUrl']}"
+          : null;
       searchResults.add({
         'name': it['name'],
-        'alias': (it['url']?.startsWith("/") ?? false) ? "$baseUrl${it['url']}" : "",
+        'alias':
+            (it['url']?.startsWith("/") ?? false) ? "$baseUrl${it['url']}" : "",
         'imageUrl': img,
       });
     }
@@ -33,10 +40,14 @@ class Animegg implements AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
+      {bool dub = false}) async {
     final url = aliasId;
 
-    final res = await get(Uri.parse(url));
+    final res = await get(
+      Uri.parse(url),
+      cacheDuration: const Duration(minutes: 5),
+    );
 
     final html = parse(res.body);
 
@@ -57,8 +68,10 @@ class Animegg implements AnimeProvider {
         throw Exception("Couldnt find the element with the episode infos");
       }
 
-      final title = div.getElementsByClassName("anititle").firstOrNull?.text.trim();
-      final url = baseUrl + (a.attributes['href'] as String); // this line on hopes n dreams
+      final title =
+          div.getElementsByClassName("anititle").firstOrNull?.text.trim();
+      final url = baseUrl +
+          (a.attributes['href'] as String); // this line on hopes n dreams
 
       eps.add({
         'episodeNumber': tab.children.length - i,
@@ -73,9 +86,13 @@ class Animegg implements AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<VideoStream>, bool) update,
+  Future<void> getStreams(
+      String episodeId, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) async {
-    final watchPage = await get(Uri.parse(episodeId));
+    final watchPage = await get(
+      Uri.parse(episodeId),
+      cacheDuration: const Duration(hours: 1),
+    );
 
     final html = parse(watchPage.body);
 
@@ -99,7 +116,10 @@ class Animegg implements AnimeProvider {
         if (id == null) continue; // not found
         final streamPageUrl = "$baseUrl/embed/$id";
 
-        final streamRes = await get(Uri.parse(streamPageUrl));
+        final streamRes = await get(
+          Uri.parse(streamPageUrl),
+          cacheDuration: const Duration(hours: 1),
+        );
         final streamHtml = parse(streamRes.body);
         final scripts = streamHtml.querySelectorAll('script');
 
@@ -108,7 +128,9 @@ class Animegg implements AnimeProvider {
         for (final script in scripts) {
           if (gotScript) break;
           final body = script.innerHtml;
-          final match = RegExp(r"var\s+videoSources\s*=\s*(\[[\s\S]*?\]);", multiLine: true).firstMatch(body);
+          final match = RegExp(r"var\s+videoSources\s*=\s*(\[[\s\S]*?\]);",
+                  multiLine: true)
+              .firstMatch(body);
           if (match == null) {
             continue;
           } else {
@@ -116,28 +138,36 @@ class Animegg implements AnimeProvider {
           }
           final raw = match.group(1)!;
 
-          final cleaned = raw.replaceAllMapped(RegExp(r'(\w+):'), (m) => '"${m[1]}":').replaceAll("'", '"');
+          final cleaned = raw
+              .replaceAllMapped(RegExp(r'(\w+):'), (m) => '"${m[1]}":')
+              .replaceAll("'", '"');
 
-          final List<Map<String, dynamic>> sourceList = List.castFrom(jsonDecode(cleaned));
+          final List<Map<String, dynamic>> sourceList =
+              List.castFrom(jsonDecode(cleaned));
 
           sourceList.forEach((e) {
             update([
-              VideoStream(quality: e['label'], url: baseUrl + e['file'], server: "AnimEgg", backup: e['isBk'] ?? false,
-              customHeaders: {
-                'referer': streamPageUrl,
-              }
-              )
+              VideoStream(
+                  quality: e['label'],
+                  url: baseUrl + e['file'],
+                  server: "AnimEgg",
+                  backup: e['isBk'] ?? false,
+                  customHeaders: {
+                    'referer': streamPageUrl,
+                  })
             ], false);
           });
         }
       }
     }
 
-    update([], true); // too lazy to track the index n stuff, just send finished!
+    update(
+        [], true); // too lazy to track the index n stuff, just send finished!
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream>, bool) update,
+  Future<void> getDownloadSources(
+      String episodeUrl, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) {
     throw UnimplementedError();
   }

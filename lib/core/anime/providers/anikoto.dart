@@ -5,7 +5,7 @@ import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:html/parser.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class Anikoto implements AnimeProvider {
   @override
@@ -24,7 +24,11 @@ class Anikoto implements AnimeProvider {
   Future<List<Map<String, String?>>> search(String query) async {
     final url = "$_ajaxUrl/anime/search?keyword=$query";
     final sr = <Map<String, String?>>[];
-    final res = await get(Uri.parse(url), headers: _headers);
+    final res = await get(
+      Uri.parse(url),
+      headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
 
     final json = jsonDecode(res.body);
     final htmlString = json['result']?['html'];
@@ -59,13 +63,19 @@ class Anikoto implements AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
+      {bool dub = false}) async {
     final url = Uri.parse(aliasId);
 
-    final webRes = await get(url, headers: _headers);
+    final webRes = await get(
+      url,
+      headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
 
     final html = parse(webRes.body);
-    final id = html.querySelector("div#watch-main")?.attributes['data-id']?.trim();
+    final id =
+        html.querySelector("div#watch-main")?.attributes['data-id']?.trim();
 
     if (id == null) {
       throw Exception("Failed to fetch anime episode link. No data-id found.");
@@ -73,7 +83,11 @@ class Anikoto implements AnimeProvider {
 
     final episodeListUrl = "$_ajaxUrl/episode/list/$id?vrf=";
 
-    final episodeListRes = await get(Uri.parse(episodeListUrl), headers: _headers);
+    final episodeListRes = await get(
+      Uri.parse(episodeListUrl),
+      headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
 
     final episodeListJson = jsonDecode(episodeListRes.body);
     final episodeListHtml = episodeListJson['result'];
@@ -126,9 +140,9 @@ class Anikoto implements AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<VideoStream>, bool) update,
+  Future<void> getStreams(
+      String episodeId, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) async {
-
     // do this mf async-ly it should be giving a response till we got the other streams
     Future<Map<String, dynamic>>? kiwires;
     final splitMetadata = metadata?.split("-");
@@ -141,7 +155,11 @@ class Anikoto implements AnimeProvider {
 
     final serverListUrl = "$_ajaxUrl/server/list?servers=$episodeId";
 
-    final serverListRes = await get(Uri.parse(serverListUrl), headers: _headers);
+    final serverListRes = await get(
+      Uri.parse(serverListUrl),
+      headers: _headers,
+      cacheDuration: const Duration(hours: 1),
+    );
 
     final serverListJson = jsonDecode(serverListRes.body);
     final serverListHtml = serverListJson['result'];
@@ -169,17 +187,22 @@ class Anikoto implements AnimeProvider {
 
         final isDub = grpName?.toLowerCase().contains("dub") ?? false;
 
-        if(isDub != dub) {
+        if (isDub != dub) {
           continue;
         }
 
-        servers.add({"srv_name": serverName, "link_id": linkId, "group_name": grpName});
+        servers.add(
+            {"srv_name": serverName, "link_id": linkId, "group_name": grpName});
       }
 
       // it should be recieving the kiwires data in parallel, so we can update the streams as soon as we get them
       final kiwiresData = await kiwires;
-      if(kiwiresData != null && kiwiresData.isNotEmpty) {
-        servers.add({"srv_name": "Kiwi", "link_id": kiwiresData['sub']?['url']?.toString(), "group_name": "Kiwi"});
+      if (kiwiresData != null && kiwiresData.isNotEmpty) {
+        servers.add({
+          "srv_name": "Kiwi",
+          "link_id": kiwiresData['sub']?['url']?.toString(),
+          "group_name": "Kiwi"
+        });
       }
     }
 
@@ -191,7 +214,11 @@ class Anikoto implements AnimeProvider {
         continue;
       }
 
-      final serverRes = await get(Uri.parse("$serverGetUrl$linkId"), headers: _headers);
+      final serverRes = await get(
+        Uri.parse("$serverGetUrl$linkId"),
+        headers: _headers,
+        cacheDuration: const Duration(hours: 1),
+      );
 
       final serverJson = jsonDecode(serverRes.body);
 
@@ -201,18 +228,21 @@ class Anikoto implements AnimeProvider {
         continue;
       }
 
-      update(await _extractStreams(streamUrl, server: server['srv_name']), false);
+      update(
+          await _extractStreams(streamUrl, server: server['srv_name']), false);
     }
 
     update([], true);
   }
 
-  Future<List<VideoStream>> _extractStreams(String streamUrl, {String quality = "default", String? server}) async {
+  Future<List<VideoStream>> _extractStreams(String streamUrl,
+      {String quality = "default", String? server}) async {
     final host = Uri.parse(streamUrl).host.toLowerCase().split(".").first;
 
     switch (host.toLowerCase()) {
       case "vidtube":
-        return await VidtubeExtractor().extract(streamUrl, quality: quality, server: server);
+        return await VidtubeExtractor()
+            .extract(streamUrl, quality: quality, server: server);
       // case "mewcdn":
       //   return Kwik().extract(streamUrl, quality: quality, server: server);
       default:
@@ -224,11 +254,15 @@ class Anikoto implements AnimeProvider {
   }
 
   Future<Map<String, dynamic>> _getKiwiStreamId(String malId, int ep) async {
-    final mapperApiUrl = "$_mapperUrl/api/mal/$malId/$ep/${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+    final mapperApiUrl =
+        "$_mapperUrl/api/mal/$malId/$ep/${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
 
     // remove the XMLHTTPRequest header if causing issues
-    final mapperRes = await get(Uri.parse(mapperApiUrl), headers: _headers);
-
+    final mapperRes = await get(
+      Uri.parse(mapperApiUrl),
+      headers: _headers,
+      cacheDuration: const Duration(hours: 1),
+    );
 
     final mapperJson = jsonDecode(mapperRes.body);
 
@@ -236,7 +270,8 @@ class Anikoto implements AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream>, bool) update,
+  Future<void> getDownloadSources(
+      String episodeUrl, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) async {
     throw UnimplementedError();
   }

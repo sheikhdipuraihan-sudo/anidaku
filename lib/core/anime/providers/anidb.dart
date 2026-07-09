@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:html/parser.dart' as html;
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 class AniDB implements AnimeProvider {
   @override
@@ -19,6 +19,7 @@ class AniDB implements AnimeProvider {
     final res = await get(
       Uri.parse('$_baseUrl/browse?q=$query'),
       headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
     );
 
     // print(res.body);
@@ -46,12 +47,14 @@ class AniDB implements AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
+      {bool dub = false}) async {
     final id = aliasId.split('-').last;
 
     final res = await get(
       Uri.parse('$_baseUrl/api/frontend/anime/$id/episodes'),
       headers: _headers,
+      cacheDuration: const Duration(minutes: 5),
     );
 
     final List<Map<String, dynamic>> episodes = [];
@@ -89,6 +92,7 @@ class AniDB implements AnimeProvider {
     final res = await get(
       Uri.parse('$_baseUrl/api/frontend/episode/$episodeId/languages'),
       headers: _headers,
+      cacheDuration: const Duration(hours: 1),
     );
 
     final json = jsonDecode(res.body);
@@ -102,7 +106,11 @@ class AniDB implements AnimeProvider {
       final embedUrl = stream['embed_url'];
       if (embedUrl == null) continue;
 
-      final resEmbed = await get(Uri.parse(embedUrl), headers: _headers);
+      final resEmbed = await get(
+        Uri.parse(embedUrl),
+        headers: _headers,
+        cacheDuration: const Duration(hours: 1),
+      );
       final document = html.parse(resEmbed.body);
       final scriptTags = document.querySelectorAll('body script');
 

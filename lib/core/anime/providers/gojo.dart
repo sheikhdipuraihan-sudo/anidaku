@@ -4,7 +4,7 @@ import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/values.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
@@ -25,8 +25,13 @@ class Gojo extends AnimeProvider {
 
   @override
   Future<List<Map<String, String>>> search(String query) async {
-    final res = await get(Uri.parse("$apiUrl/search/?query=$query"), headers: headers);
-    final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body)['results']);
+    final res = await get(
+      Uri.parse("$apiUrl/search/?query=$query"),
+      headers: headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
+    final List<Map<String, dynamic>> json =
+        List.castFrom(jsonDecode(res.body)['results']);
     final List<Map<String, String>> sr = [];
     for (final item in json) {
       sr.add({
@@ -40,11 +45,16 @@ class Gojo extends AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
+      {bool dub = false}) async {
     //alias id here is the anilist id
 
     final url = Uri.parse("$apiUrl/eps/$aliasId");
-    final res = await get(url, headers: headers);
+    final res = await get(
+      url,
+      headers: headers,
+      cacheDuration: const Duration(minutes: 5),
+    );
     final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body));
     final newSht = json.map<Map<String, dynamic>>((item) {
       final int epNum = item['ep_num']?.toInt();
@@ -70,20 +80,33 @@ class Gojo extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String epLink, Function(List<VideoStream> list, bool isFinished) update,
+  Future<void> getStreams(
+      String epLink, Function(List<VideoStream> list, bool isFinished) update,
       {bool dub = false, String? metadata}) async {
     final id = epLink;
     final epNum = metadata;
-    if (metadata == null) throw Exception("Couldnt get streams, required field metadata recieved null.");
+    if (metadata == null)
+      throw Exception(
+          "Couldnt get streams, required field metadata recieved null.");
 
     final List<Future<Response>> futures = [];
 
-    final serverList = await get(Uri.parse("$apiUrl/servers/$id/$epNum"), headers: headers);
-    final List<Map<String, dynamic>> serversJson = List.castFrom(jsonDecode(serverList.body));
+    final serverList = await get(
+      Uri.parse("$apiUrl/servers/$id/$epNum"),
+      headers: headers,
+      cacheDuration: const Duration(hours: 1),
+    );
+    final List<Map<String, dynamic>> serversJson =
+        List.castFrom(jsonDecode(serverList.body));
     // print(serversJson);
     serversJson.forEach((it) {
-      final url = "$apiUrl/oppai/$id/$epNum?server=${it['id']}&source_type=${dub ? "dub" : "sub"}";
-      final res = get(Uri.parse(url), headers: headers);
+      final url =
+          "$apiUrl/oppai/$id/$epNum?server=${it['id']}&source_type=${dub ? "dub" : "sub"}";
+      final res = get(
+        Uri.parse(url),
+        headers: headers,
+        cacheDuration: const Duration(hours: 1),
+      );
       futures.add(res);
     });
 
@@ -100,17 +123,24 @@ class Gojo extends AnimeProvider {
 
       doneSources++;
 
-      if (sources?.isEmpty == true) return update([], doneSources == totalSources);
+      if (sources?.isEmpty == true)
+        return update([], doneSources == totalSources);
 
       final provider = item.request?.url.queryParameters['server'] ?? '';
-      final subs = (subtitles?.where((it) => it['lang'] == "English").firstOrNull?['url'] ?? //pick only english
+      final subs = (subtitles
+              ?.where((it) => it['lang'] == "English")
+              .firstOrNull?['url'] ?? //pick only english
           subtitles?.firstOrNull?['url']) as String?;
 
       sources?.forEach((i) => update(
             [
               VideoStream(
-                quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
-                url: (i['url'] as String).startsWith("/") ? "$_proxyUrl${i['url']}" : i['url'],
+                quality: i['quality']?.trim() == 'master'
+                    ? "multi-quality"
+                    : i['quality'],
+                url: (i['url'] as String).startsWith("/")
+                    ? "$_proxyUrl${i['url']}"
+                    : i['url'],
                 server: provider,
                 backup: false,
                 subtitleFormat: SubtitleFormat.VTT.name, // gojo uses vtt mainly
@@ -128,7 +158,8 @@ class Gojo extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
+  Future<void> getDownloadSources(
+      String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) {
     // download the stream
     throw UnimplementedError();

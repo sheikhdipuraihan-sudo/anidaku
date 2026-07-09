@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:animestream/core/app/env.dart';
 import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/core/database/types.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/network/network.dart';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/secureStorage.dart';
@@ -39,7 +39,7 @@ class SimklMutation extends DatabaseMutation {
 
   @override
   Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) async {
-     final url = "https://api.simkl.com/sync/history/remove";
+    final url = "https://api.simkl.com/sync/history/remove";
     final body = jsonEncode({
       'shows': [
         {
@@ -79,7 +79,8 @@ class SimklMutation extends DatabaseMutation {
     // }
   }
 
-  Future syncToHistory(int id, int progress, {String? bodyString = null}) async {
+  Future syncToHistory(int id, int progress,
+      {String? bodyString = null}) async {
     final url = "https://api.simkl.com/sync/history";
     List<Map<String, int>> episodes = [];
 

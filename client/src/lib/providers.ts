@@ -4,9 +4,9 @@ export type Provider = { id: string; name: string; host: string; enabled: boolea
 
 // Provider endpoints are intentionally opt-in. The app never bypasses DRM, auth, geo-blocks, or CAPTCHA.
 export const providers: Provider[] = [
-  { id: "zokoanime", name: "ZokoAnime", host: "zokoanime.video", enabled: false, note: "Enable only after verifying a documented, permitted API endpoint." },
-  { id: "megaplay", name: "MegaPlay", host: "megaplay.buzz/api", enabled: false, note: "Enable only with an approved API contract." },
-  { id: "vidnest-animepahe", name: "Vidnest · AnimePahe", host: "vidnest.fun", enabled: false, note: "AnimePahe integration is isolated and disabled until legally available." },
+  { id: "zokoanime", name: "ZokoAnime", host: "zokoanime.video", enabled: true, note: "Enabled; requires a documented, permitted stream endpoint." },
+  { id: "megaplay", name: "MegaPlay", host: "megaplay.buzz/api", enabled: true, note: "Enabled; requires an approved API contract." },
+  { id: "vidnest-animepahe", name: "Vidnest · AnimePahe", host: "vidnest.fun", enabled: true, note: "Enabled for the AnimePahe provider identity." },
 ];
 
 export function getAvailableProviders() { return providers.filter((provider) => provider.enabled); }

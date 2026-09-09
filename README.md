@@ -37,7 +37,7 @@ Provider definitions live in `client/src/lib/providers.ts`. The three requested 
 - `megaplay.buzz/api`
 - `vidnest.fun` with the AnimePahe provider identity
 
-They are disabled by default because these services do not provide a stable, verified public API contract in this project. To enable a provider, add its documented and permitted `getStream` implementation and set `enabled: true`. The app deliberately does not bypass authentication, DRM, geo-restrictions, access controls, or CAPTCHAs.
+All three provider entries are enabled in the configuration as requested. They still require a documented, permitted `getStream` implementation before playback can resolve a stream; the app deliberately does not invent undocumented endpoints or bypass authentication, DRM, geo-restrictions, access controls, or CAPTCHAs. Provider fallback is ready to use as soon as the approved adapter contracts are supplied.
 
 ## Notes
 

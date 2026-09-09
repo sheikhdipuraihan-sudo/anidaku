@@ -1,0 +1,44 @@
+# Anidaku
+
+Anidaku is an original, dark-first anime discovery and watching experience powered by the public **AniList GraphQL API**. It is designed as a fast responsive frontend with local browser persistence for watchlists and watch progress.
+
+## Included
+
+- AniList-powered trending, popular, seasonal, search, detail, relation, and recommendation views.
+- Adult-content filtering: AniList adult titles and the Hentai genre are excluded from UI results.
+- Responsive navigation with mobile bottom navigation and desktop header.
+- Anime detail pages with metadata, studio, genres, recommendations, and episode guide.
+- Watch page with episode navigation, progress persistence, player shell, and server status panel.
+- Local watchlist and resume progress using namespaced `localStorage` keys.
+- Isolated streaming-provider interface for ZokoAnime, MegaPlay, and Vidnest AnimePahe.
+- Provider fallback orchestration that only calls explicitly enabled adapter endpoints.
+- Accessible focus states, reduced-motion support, loading and error messaging.
+
+## Run locally
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Then open the generated preview URL. Production validation:
+
+```bash
+pnpm check
+pnpm test
+pnpm build
+```
+
+## Provider configuration
+
+Provider definitions live in `client/src/lib/providers.ts`. The three requested providers are represented as isolated adapters:
+
+- `zokoanime.video`
+- `megaplay.buzz/api`
+- `vidnest.fun` with the AnimePahe provider identity
+
+They are disabled by default because these services do not provide a stable, verified public API contract in this project. To enable a provider, add its documented and permitted `getStream` implementation and set `enabled: true`. The app deliberately does not bypass authentication, DRM, geo-restrictions, access controls, or CAPTCHAs.
+
+## Notes
+
+AniList is queried directly from the browser because it does not require a secret API key. Results are cached in-memory for five minutes and filtered before presentation. Watchlist and progress are intentionally local-only in this version, so no database or custom authentication setup is required.

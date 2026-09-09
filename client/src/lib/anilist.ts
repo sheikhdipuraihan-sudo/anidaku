@@ -1,0 +1,44 @@
+export type Anime = {
+  id: number;
+  title: { romaji?: string; english?: string; native?: string };
+  description?: string;
+  coverImage: { extraLarge?: string; large?: string; color?: string };
+  bannerImage?: string;
+  genres: string[];
+  format?: string;
+  status?: string;
+  season?: string;
+  seasonYear?: number;
+  episodes?: number;
+  duration?: number;
+  averageScore?: number;
+  popularity?: number;
+  isAdult?: boolean;
+  nextAiringEpisode?: { episode: number; airingAt: number };
+  studios?: { nodes: { name: string }[] };
+  tags?: { name: string; rank: number }[];
+  relations?: { edges: { relationType: string; node: Anime }[] };
+  recommendations?: { nodes: { mediaRecommendation: Anime }[] };
+};
+const API = "https://graphql.anilist.co";
+const cache = new Map<string, { at: number; value: unknown }>();
+const CACHE_MS = 1000 * 60 * 5;
+const fallback: Anime[] = [
+  { id: 20958, title: { romaji: "Shingeki no Kyojin", english: "Attack on Titan" }, description: "Humanity's last refuge stands behind towering walls in this acclaimed action drama.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800" }, bannerImage: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1800", genres: ["Action", "Drama", "Fantasy"], format: "TV", status: "FINISHED", seasonYear: 2013, episodes: 25, averageScore: 88, popularity: 1000000, studios: { nodes: [{ name: "WIT Studio" }] } },
+  { id: 154587, title: { romaji: "Sousou no Frieren", english: "Frieren: Beyond Journey's End" }, description: "An elven mage begins a new journey after the adventure has already ended.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800" }, bannerImage: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1800", genres: ["Adventure", "Drama", "Fantasy"], format: "TV", status: "FINISHED", seasonYear: 2023, episodes: 28, averageScore: 91, popularity: 900000, studios: { nodes: [{ name: "Madhouse" }] } },
+  { id: 16498, title: { romaji: "One Punch Man", english: "One-Punch Man" }, description: "A hero who can defeat any opponent with a single punch searches for a worthy challenge.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1563089145-599997674d42?w=800" }, bannerImage: "https://images.unsplash.com/photo-1563089145-599997674d42?w=1800", genres: ["Action", "Comedy", "Sci-Fi"], format: "TV", status: "FINISHED", seasonYear: 2015, episodes: 12, averageScore: 86, popularity: 800000, studios: { nodes: [{ name: "Madhouse" }] } },
+  { id: 101922, title: { romaji: "Kimetsu no Yaiba", english: "Demon Slayer" }, description: "A kindhearted boy joins the Demon Slayer Corps to save his sister and avenge his family.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800" }, bannerImage: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1800", genres: ["Action", "Adventure", "Supernatural"], format: "TV", status: "FINISHED", seasonYear: 2019, episodes: 26, averageScore: 87, popularity: 950000, studios: { nodes: [{ name: "ufotable" }] } },
+  { id: 113415, title: { romaji: "Jujutsu Kaisen", english: "Jujutsu Kaisen" }, description: "A student enters a secret world of cursed energy and supernatural combat.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1541560052-77ec1bbc09f7?w=800" }, bannerImage: "https://images.unsplash.com/photo-1541560052-77ec1bbc09f7?w=1800", genres: ["Action", "Supernatural", "Drama"], format: "TV", status: "FINISHED", seasonYear: 2020, episodes: 24, averageScore: 87, popularity: 880000, studios: { nodes: [{ name: "MAPPA" }] } },
+  { id: 110277, title: { romaji: "Bocchi the Rock!", english: "Bocchi the Rock!" }, description: "A lonely guitarist finds a place to belong when she joins a live house band.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800" }, bannerImage: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=1800", genres: ["Comedy", "Music", "Slice of Life"], format: "TV", status: "FINISHED", seasonYear: 2022, episodes: 12, averageScore: 88, popularity: 420000, studios: { nodes: [{ name: "CloverWorks" }] } },
+];
+const safe = (items: Anime[] = []) => items.filter((a) => !a.isAdult && !a.genres?.includes("Hentai"));
+async function query<T>(queryText: string, variables: Record<string, unknown> = {}): Promise<T> { const key = JSON.stringify({ queryText, variables }); const hit = cache.get(key); if (hit && Date.now() - hit.at < CACHE_MS) return hit.value as T; const response = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ query: queryText, variables }) }); if (!response.ok) throw new Error(`AniList unavailable (${response.status})`); const json = await response.json(); if (json.errors?.length) throw new Error("AniList returned an error"); cache.set(key, { at: Date.now(), value: json.data }); return json.data as T; }
+const fields = `id title { romaji english native } description(asHtml: false) coverImage { extraLarge large color } bannerImage genres format status season seasonYear episodes duration averageScore popularity isAdult nextAiringEpisode { episode airingAt } studios { nodes { name } } tags { name rank }`;
+export async function getHome() { try { const data = await query<{ trending: { media: Anime[] }; popular: { media: Anime[] }; seasonal: { media: Anime[] } }>(`query($season: MediaSeason, $year: Int) { trending: Page(perPage: 12) { media(sort: TRENDING_DESC, type: ANIME, isAdult: false) { ${fields} } } popular: Page(perPage: 12) { media(sort: POPULARITY_DESC, type: ANIME, isAdult: false) { ${fields} } } seasonal: Page(perPage: 12) { media(season: $season, seasonYear: $year, sort: POPULARITY_DESC, type: ANIME, isAdult: false) { ${fields} } } }`, { season: "FALL", year: new Date().getFullYear() }); return { trending: safe(data.trending.media), popular: safe(data.popular.media), seasonal: safe(data.seasonal.media) }; } catch { return { trending: fallback, popular: [...fallback].reverse(), seasonal: fallback.slice(1) }; } }
+export async function searchAnime(search: string, page = 1, genre?: string) { try { const data = await query<{ page: { media: Anime[]; pageInfo: { currentPage: number; lastPage: number; hasNextPage: boolean } } }>(`query($search: String, $page: Int, $genre: String) { page: Page(page: $page, perPage: 24) { pageInfo { currentPage lastPage hasNextPage } media(search: $search, genre: $genre, sort: POPULARITY_DESC, type: ANIME, isAdult: false) { ${fields} } } }`, { search: search || undefined, page, genre: genre || undefined }); return { items: safe(data.page.media), pageInfo: data.page.pageInfo }; } catch { const term = search.toLowerCase(); return { items: fallback.filter((a) => !term || titleOf(a).toLowerCase().includes(term) || a.genres.some((g) => g.toLowerCase().includes(term))), pageInfo: { currentPage: 1, lastPage: 1, hasNextPage: false } }; } }
+export async function getAnime(id: number) { try { const data = await query<{ Media: Anime & { relations: Anime["relations"]; recommendations: Anime["recommendations"] } }>(`query($id: Int) { Media(id: $id, type: ANIME) { ${fields} relations { edges { relationType node { ${fields} } } } recommendations { nodes { mediaRecommendation { ${fields} } } } } }`, { id }); return data.Media && !data.Media.isAdult ? data.Media : null; } catch { return fallback.find((anime) => anime.id === id) || fallback[0]; } }
+export function titleOf(anime: Anime) { return anime.title.english || anime.title.romaji || anime.title.native || "Untitled anime"; }
+export function cleanDescription(value?: string) { return (value || "No description available.").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&"); }
+export function imageOf(anime: Anime) { return anime.coverImage.extraLarge || anime.coverImage.large || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800"; }
+export function remember(key: string, value: unknown) { localStorage.setItem(`anidaku:${key}`, JSON.stringify(value)); }
+export function recall<T>(key: string, fallbackValue: T): T { try { return JSON.parse(localStorage.getItem(`anidaku:${key}`) || "null") ?? fallbackValue; } catch { return fallbackValue; } }

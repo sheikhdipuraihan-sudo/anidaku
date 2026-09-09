@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server'
+
+const endpoint = 'https://graphql.anilist.co'
+const query = `query ($page: Int, $perPage: Int, $search: String) { Page(page: $page, perPage: $perPage) { pageInfo { currentPage hasNextPage } media(type: ANIME, search: $search, isAdult: false, sort: TRENDING_DESC) { id idMal title { romaji english native } coverImage { extraLarge large color } bannerImage description episodes duration averageScore genres isAdult status seasonYear } } }`
+
+export async function GET(request: Request) { const { searchParams } = new URL(request.url); const search = searchParams.get('search') || undefined; const page = Number(searchParams.get('page') || 1); try { const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ query, variables: { page, perPage: 18, search } }), next: { revalidate: 300 } }); if (!response.ok) return NextResponse.json({ error: 'AniList request failed' }, { status: response.status }); const data = await response.json(); return NextResponse.json(data.data.Page); } catch { return NextResponse.json({ error: 'Unable to reach AniList' }, { status: 502 }) } }

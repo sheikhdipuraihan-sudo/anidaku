@@ -13,3 +13,5 @@ button:active, a:active { transform: scale(.98); }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { scrollbar-width: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+.search-form:focus-within { border-color: rgba(255,255,255,.1) !important; box-shadow: none !important; outline: none !important; }
+.search-field, .search-field:focus, .search-field:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }

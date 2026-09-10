@@ -58,6 +58,17 @@ export async function getSchedule() { const result = await getCollection("trendi
 export async function getAnime(id: number) { try { const data = await query<{ Media: Anime & { relations: Anime["relations"]; recommendations: Anime["recommendations"] } }>(`query($id: Int) { Media(id: $id, type: ANIME) { ${fields} relations { edges { relationType node { ${fields} } } } recommendations { nodes { mediaRecommendation { ${fields} } } } } }`, { id }); return data.Media && !data.Media.isAdult ? data.Media : null; } catch { return fallback.find((anime) => anime.id === id) || fallback[0]; } }
 export function titleOf(anime: Anime) { return anime.title.english || anime.title.romaji || anime.title.native || "Untitled anime"; }
 export function cleanDescription(value?: string) { return (value || "No description available.").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&"); }
+export function releasedEpisodes(anime: Anime) {
+  if (anime.nextAiringEpisode?.episode) return Math.max(0, anime.nextAiringEpisode.episode - 1);
+  if (anime.status === "FINISHED") return anime.episodes;
+  return undefined;
+}
+export function episodeLabel(anime: Anime) {
+  const released = releasedEpisodes(anime);
+  if (anime.status === "FINISHED" && released != null) return `${released} / ${released} Episodes`;
+  if (released != null) return `Episodes released: ${released}`;
+  return anime.status === "NOT_YET_RELEASED" ? "Not released" : "Released episodes unavailable";
+}
 export function imageOf(anime: Anime) { return anime.coverImage.extraLarge || anime.coverImage.large || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800"; }
 export function remember(key: string, value: unknown) { localStorage.setItem(`anidaku:${key}`, JSON.stringify(value)); }
 export function recall<T>(key: string, fallbackValue: T): T { try { return JSON.parse(localStorage.getItem(`anidaku:${key}`) || "null") ?? fallbackValue; } catch { return fallbackValue; } }

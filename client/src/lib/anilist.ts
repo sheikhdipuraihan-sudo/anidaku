@@ -24,7 +24,9 @@ export type Anime = {
 
 const API = "https://graphql.anilist.co";
 const cache = new Map<string, { at: number; value: unknown }>();
+const pending = new Map<string, Promise<unknown>>();
 const CACHE_MS = 1000 * 60 * 5;
+const CACHE_PREFIX = "anidaku:api-cache:";
 const fallback: Anime[] = [
   { id: 20958, title: { romaji: "Shingeki no Kyojin", english: "Attack on Titan" }, description: "Humanity's last refuge stands behind towering walls in this acclaimed action drama.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800" }, bannerImage: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1800", genres: ["Action", "Drama", "Fantasy"], format: "TV", status: "FINISHED", seasonYear: 2013, episodes: 25, averageScore: 88, popularity: 1000000, studios: { nodes: [{ name: "WIT Studio" }] } },
   { id: 154587, title: { romaji: "Sousou no Frieren", english: "Frieren: Beyond Journey's End" }, description: "An elven mage begins a new journey after the adventure has already ended.", coverImage: { extraLarge: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800" }, bannerImage: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1800", genres: ["Adventure", "Drama", "Fantasy"], format: "TV", status: "FINISHED", seasonYear: 2023, episodes: 28, averageScore: 91, popularity: 900000, studios: { nodes: [{ name: "Madhouse" }] } },
@@ -33,12 +35,22 @@ const fallback: Anime[] = [
 const safe = (items: Anime[] = []) => items.filter((a) => !a.isAdult && !a.genres?.includes("Hentai"));
 async function query<T>(queryText: string, variables: Record<string, unknown> = {}): Promise<T> {
   const key = JSON.stringify({ queryText, variables }); const hit = cache.get(key); if (hit && Date.now() - hit.at < CACHE_MS) return hit.value as T;
+  try { const stored = sessionStorage.getItem(CACHE_PREFIX + key); if (stored) { const parsed = JSON.parse(stored) as { at: number; value: T }; if (Date.now() - parsed.at < CACHE_MS) { cache.set(key, parsed); return parsed.value; } sessionStorage.removeItem(CACHE_PREFIX + key); } } catch {}
+  const existing = pending.get(key); if (existing) return existing as Promise<T>;
+  const request = queryFresh<T>(queryText, variables, key);
+  pending.set(key, request);
+  try { return await request; } finally { pending.delete(key); }
+}
+async function queryFresh<T>(queryText: string, variables: Record<string, unknown>, key: string): Promise<T> {
   const controller = new AbortController(); const timeout = window.setTimeout(() => controller.abort(), 7000);
   try {
     const response = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ query: queryText, variables }), signal: controller.signal });
     if (!response.ok) throw new Error(`AniList unavailable (${response.status})`);
     const json = await response.json(); if (json.errors?.length) throw new Error("AniList returned an error");
-    cache.set(key, { at: Date.now(), value: json.data }); return json.data as T;
+    const entry = { at: Date.now(), value: json.data };
+    cache.set(key, entry);
+    try { sessionStorage.setItem(CACHE_PREFIX + key, JSON.stringify(entry)); } catch {}
+    return json.data as T;
   } finally { window.clearTimeout(timeout); }
 }
 const fields = `id title { romaji english native } description(asHtml: false) coverImage { extraLarge large color } bannerImage genres format status season seasonYear episodes duration averageScore popularity isAdult updatedAt nextAiringEpisode { episode airingAt timeUntilAiring } studios { nodes { name } } tags { name rank }`;

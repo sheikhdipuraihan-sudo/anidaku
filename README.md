@@ -22,8 +22,6 @@ A clean, fast, and completely free anime streaming experience made for discoveri
   <img src="https://img.shields.io/badge/Made%20for-Anime%20Fans-0B1220?style=for-the-badge" alt="Made for anime fans" />
 </p>
 
-<img src="client/public/anidaku-banner.gif" alt="Animated Anidaku play mark" width="320" />
-
 </div>
 
 ## Why Anidaku?

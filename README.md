@@ -1,6 +1,6 @@
 
 
-![Anidaku favicon](client/public/favicon.svg)
+<img src="client/public/favicon.svg" alt="Anidaku favicon" width="64" height="64" />
 
 ## A better way to stream anime
 

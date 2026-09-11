@@ -13,6 +13,8 @@ A clean, fast, and completely free anime streaming experience made for discoveri
   &nbsp;&nbsp;•&nbsp;&nbsp;
   <a href="#why-anidaku"><strong>Why Anidaku?</strong></a>
   &nbsp;&nbsp;•&nbsp;&nbsp;
+  <a href="#streaming-interface"><strong>Streaming interface</strong></a>
+  &nbsp;&nbsp;•&nbsp;&nbsp;
   <a href="#get-started"><strong>Get started</strong></a>
 </p>
 
@@ -38,6 +40,19 @@ It is completely free to use and built around a no-ads viewing experience, so yo
 | Seasonal anime browsing | Simple episode navigation | Resume your progress |
 | Fast title search | Comfortable dark-first design | Favorites to revisit later |
 | Recommendations and related series | Responsive player experience | Works across devices |
+
+## Streaming interface
+
+The Anidaku viewing experience is designed to keep every important control close at hand:
+
+- **Focused video area** with a clean layout that keeps attention on the episode.
+- **Episode browser** for moving between episodes without leaving the watch page.
+- **Continue watching flow** that makes it easy to return to the next unfinished episode.
+- **Anime and episode context** so the title, episode information, and series details stay easy to find.
+- **Watch progress memory** for keeping your place while you move around the site.
+- **Responsive controls** that adapt comfortably from desktop screens to mobile devices.
+- **Helpful loading and error states** that clearly explain what is happening.
+- **Dark-first styling** designed for a comfortable viewing environment.
 
 ### Everything you need to find your next favorite
 

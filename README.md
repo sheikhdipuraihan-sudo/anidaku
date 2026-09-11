@@ -1,69 +1,35 @@
 # Anidaku
 
-Anidaku is an original, dark-first anime discovery and watching experience powered by the public **AniList GraphQL API**. It is designed as a fast responsive frontend with local browser persistence for watchlists and watch progress.
+![Anidaku favicon](client/public/favicon.svg)
 
-## Included
+## A better way to stream anime
 
-- AniList-powered trending, popular, seasonal, search, detail, relation, and recommendation views.
-- Adult-content filtering: AniList adult titles and the Hentai genre are excluded from UI results.
-- Responsive navigation with mobile bottom navigation and desktop header.
-- Anime detail pages with metadata, studio, genres, recommendations, and episode guide.
-- Watch page with episode navigation, progress persistence, player shell, and server status panel.
-- Local watchlist and resume progress using namespaced `localStorage` keys.
-- Isolated streaming-provider interface for ZokoAnime, MegaPlay, and Vidnest AnimePahe.
-- Provider fallback orchestration that only calls explicitly enabled adapter endpoints.
-- Accessible focus states, reduced-motion support, loading and error messaging.
+**Anidaku is a fast, modern anime streaming website built for fans who want a simple, focused, and enjoyable way to discover and watch anime.** Browse popular series, find something new, keep track of what you are watching, and enjoy a clean viewing experience without unnecessary distractions.
 
-## Run locally
+Anidaku is completely free to use and designed with a no-ads experience, so you can spend less time closing pop-ups and more time watching the shows you love.
 
-```bash
-pnpm install
-pnpm dev
-```
+## Features
 
-Then open the generated preview URL. Production validation:
+- **Free anime streaming** with no subscription required.
+- **Ad-free viewing experience** with a clean interface and no distracting advertising.
+- **Discover trending and popular anime** from an extensive catalog.
+- **Seasonal anime browsing** to find currently airing and upcoming series.
+- **Powerful search** for quickly finding anime by title.
+- **Detailed anime pages** with descriptions, genres, studios, related series, recommendations, and episode information.
+- **Episode navigation** that makes it easy to continue watching or jump to a specific episode.
+- **Watchlist support** for saving series you want to watch later.
+- **Watch progress tracking** so you can pick up where you left off.
+- **Responsive design** that works smoothly on phones, tablets, laptops, and desktop screens.
+- **Dark-first visual design** created for comfortable browsing and watching.
+- **Accessible controls and clear feedback** with helpful loading, error, focus, and reduced-motion states.
+- **Adult-content filtering** to keep discovery focused on general anime viewing.
 
-```bash
-pnpm check
-pnpm test
-pnpm build
-```
+## Built for anime fans
 
-## Provider configuration
+Anidaku keeps the experience centered on the things that matter: finding great anime, learning more about each series, and watching without clutter. Whether you are revisiting a favorite, following a new seasonal release, or looking for your next binge, Anidaku gives you a straightforward place to do it.
 
-Provider definitions live in `client/src/lib/providers.ts`. The three requested providers are represented as isolated adapters:
+## Watch, discover, and keep going
 
-- `zokoanime.video`
-- `megaplay.buzz/api`
-- `vidnest.fun` with the AnimePahe provider identity
+From your first search to the next episode, Anidaku is made to feel quick and effortless. Explore recommendations, save your favorites, and return whenever you are ready to continue watching.
 
-All three provider entries are enabled in the configuration as requested. They still require a documented, permitted `getStream` implementation before playback can resolve a stream; the app deliberately does not invent undocumented endpoints or bypass authentication, DRM, geo-restrictions, access controls, or CAPTCHAs. Provider fallback is ready to use as soon as the approved adapter contracts are supplied.
-
-## Notes
-
-AniList is queried directly from the browser because it does not require a secret API key. Results are cached in-memory for five minutes and filtered before presentation. Watchlist and progress are intentionally local-only in this version, so no database or custom authentication setup is required.
-
-## Deploy to Vercel
-
-This repository includes `vercel.json` configured for the Vite frontend. From the project root:
-
-```bash
-pnpm install
-pnpm build
-npx vercel
-```
-
-For a production deployment:
-
-```bash
-npx vercel --prod
-```
-
-Use the following Vercel settings if configuring the project through the dashboard:
-
-- **Framework preset:** Vite
-- **Build command:** `pnpm build`
-- **Output directory:** `dist/public`
-- **Install command:** `pnpm install`
-
-The rewrite in `vercel.json` sends client-side routes such as `/anime/20958` and `/watch/20958/1` to `index.html`, allowing wouter to handle navigation correctly.
+> **Anidaku — discover more anime, watch comfortably, and enjoy the journey.**

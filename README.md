@@ -1,4 +1,4 @@
-# Anidaku
+
 
 ![Anidaku favicon](client/public/favicon.svg)
 

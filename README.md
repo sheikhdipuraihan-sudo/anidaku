@@ -76,6 +76,16 @@ Whether you are catching up on a classic, following a seasonal release, or looki
 
 Save what interests you, keep your progress organized, and come back whenever you are ready to continue.
 
+## Connect
+
+<div align="center">
+
+<a href="https://www.facebook.com/tipuraihann"><img src="https://img.shields.io/badge/Facebook-tipuraihann-1877F2?style=for-the-badge&logo=facebook&logoColor=white" alt="Facebook: tipuraihann" /></a>
+<a href="https://www.instagram.com/ancient.niggah"><img src="https://img.shields.io/badge/Instagram-@ancient.niggah-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram: @ancient.niggah" /></a>
+<a href="https://t.me/DEMONXRAIHAN"><img src="https://img.shields.io/badge/Telegram-@DEMONXRAIHAN-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram: @DEMONXRAIHAN" /></a>
+
+</div>
+
 ## Get started
 
 <div align="center">

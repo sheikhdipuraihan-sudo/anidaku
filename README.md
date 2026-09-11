@@ -24,6 +24,13 @@ A clean, fast, and completely free anime streaming experience made for discoveri
   <img src="https://img.shields.io/badge/Made%20for-Anime%20Fans-0B1220?style=for-the-badge" alt="Made for anime fans" />
 </p>
 
+<p>
+  <img src="https://img.shields.io/badge/License-MIT-38BDF8?style=flat-square" alt="MIT license" />
+  <img src="https://img.shields.io/badge/Version-v1.0.0-7C3AED?style=flat-square" alt="Version 1.0.0" />
+  <img src="https://img.shields.io/badge/Built%20with-React%20%7C%20Vite%20%7C%20Tailwind%20CSS-0B1220?style=flat-square" alt="Built with React, Vite, and Tailwind CSS" />
+  <img src="https://img.shields.io/badge/TypeScript-Ready-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript ready" />
+</p>
+
 </div>
 
 ## Why Anidaku?
